@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="insuma">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>insuma</title>
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Passkeys Web SDK (Corbado) — requerido por passkeys_web, dependencia transitiva
+       de supabase_flutter. Debe cargarse ANTES de que arranque Flutter para que el
+       plugin no falle con "Passkeys Web SDK not loaded". Bundle v2.4.0 servido localmente. -->
+  <script src="bundle.js"></script>
+</head>
+<body>
+  <!-- #245: limpieza automática del caché tras cada deploy.
+
+       Tras un deploy, el service worker de Flutter podía quedar sirviendo una
+       MEZCLA de archivos viejos y nuevos y la app no cargaba hasta borrar el
+       site data a mano (lo destrabó el PO en DevTools). Este script compara la
+       versión desplegada con la última vista por este navegador y, si cambió,
+       borra SOLO al culpable: el service worker y su caché de archivos.
+
+       Lo que NO se borra, a propósito (el contrato lo vigila
+       test/limpieza_cache_web_test.dart, que PROHÍBE que estas APIs
+       aparezcan nombradas en este archivo — por eso acá se describen
+       sin nombrarlas):
+        - La base LOCAL de la app (offline-first), incluida la cola de
+          cambios que todavía no subió a Supabase. Borrarla en cada
+          deploy destruiría datos cargados sin conexión.
+        - La sesión y sus credenciales de navegador — borrarlas sería un
+          deslogueo forzado por deploy. (Se usa una clave propia, nada más.)
+
+       Se lee `despliegue.json` y NO `version.json`: version.json está en el
+       manifest del service worker (cache-first), así que un SW viejo serviría
+       la copia VIEJA y el cambio jamás se detectaría. despliegue.json lo sella
+       únicamente el workflow de deploy, el SW no lo conoce, y siempre viaja
+       fresco. En desarrollo local no existe: el fetch falla y no se hace nada.
+
+       Si no hay red, el arranque offline no se toca: todo el camino está
+       dentro del try. -->
+  <script>
+    (async () => {
+      try {
+        const res = await fetch('despliegue.json?t=' + Date.now(), {
+          cache: 'no-store',
+        });
+        if (!res.ok) return;
+        const { sha } = await res.json();
+        if (!sha) return;
+
+        const CLAVE = 'insuma_sha_desplegado';
+        const previo = localStorage.getItem(CLAVE);
+        localStorage.setItem(CLAVE, sha);
+        // Primera visita (nada que limpiar) o misma versión: arranque normal.
+        if (!previo || previo === sha) return;
+
+        // Guarda anti-bucle: si esta pestaña ya limpió para este sha y el
+        // navegador igual recargó, no se entra en un loop de reloads.
+        if (sessionStorage.getItem('insuma_limpieza_sha') === sha) return;
+        sessionStorage.setItem('insuma_limpieza_sha', sha);
+
+        if ('serviceWorker' in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map((r) => r.unregister()));
+        }
+        if (window.caches) {
+          const claves = await caches.keys();
+          await Promise.all(claves.map((k) => caches.delete(k)));
+        }
+        location.reload();
+      } catch (_) {
+        // Sin red o storage bloqueado: la app arranca igual, como siempre.
+      }
+    })();
+  </script>
+  <!--
+    You can customize the "flutter_bootstrap.js" script.
+    This is useful to provide a custom configuration to the Flutter loader
+    or to give the user feedback during the initialization process.
+
+    For more details:
+    * https://docs.flutter.dev/platform-integration/web/initialization
+  -->
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>

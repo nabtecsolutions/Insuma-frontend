@@ -1,0 +1,4 @@
+storePassword=<contraseña del keystore>
+keyPassword=<contraseña de la clave>
+keyAlias=insuma-release
+storeFile=<ruta absoluta al archivo .jks>

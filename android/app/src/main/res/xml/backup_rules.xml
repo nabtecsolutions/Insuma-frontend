@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- HU-112: reglas de backup para Android < 12 (fullBackupContent). Excluye todo el
+     almacenamiento local sensible. Con allowBackup="false" el backup ya está
+     deshabilitado; esto es defensa en profundidad por si se reactivara. -->
+<full-backup-content>
+    <exclude domain="database" />
+    <exclude domain="sharedpref" />
+    <exclude domain="file" />
+    <exclude domain="external" />
+    <exclude domain="root" />
+</full-backup-content>
