@@ -1,17 +1,28 @@
-# insuma
+# INSUMA — frontend
 
-A new Flutter project.
+Copia de la app INSUMA (Flutter) para explorar variantes de interfaz.
+Gestión de costos gastronómicos offline-first con sincronización a Supabase.
 
-## Getting Started
+## Requisitos
 
-This project is a starting point for a Flutter application.
+- Flutter 3.44 o superior (Dart `^3.12.1`). Verificar con `flutter --version`.
+- Chrome, para correrla en web.
 
-A few resources to get you started if this is your first Flutter project:
+## Arrancar
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+```bash
+flutter pub get
+cp assets/.env.example assets/.env   # y completar SUPABASE_URL / SUPABASE_ANON_KEY
+flutter run -d chrome
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Los valores de Supabase y un usuario para entrar los pasa el equipo de desarrollo.
+Todo lo que hagas en la app (crear insumos, pedidos, pagos) se guarda de verdad en
+esa base: usá el entorno que te indiquen, no uno con datos reales.
+
+En Windows, si `git clone` falla con `Filename too long`, habilitá rutas largas:
+`git config --global core.longpaths true`.
+
+## Dónde está cada cosa
+
+Ver [`CLAUDE.md`](CLAUDE.md): qué carpetas son de interfaz y cuáles conviene no tocar.
